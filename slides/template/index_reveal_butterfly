@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>{{title}}</title>
+  {{{style}}}
+  <script src="remark.min.js"></script>  
+  <script src="mermaid.min.js"></script>
+  <script>
+    function create() {
+      return remark.create({
+        {{{source}}},
+        ratio: '16:9',
+        highlightLines: true,
+        countIncrementalSlides: false,
+        highlightStyle: 'monokai'
+      });
+    }
+
+function initMermaidInSlide(slide) {
+  var slideIndex = slide.getSlideIndex();
+  // caution: no API to get the DOM element of current slide in remark, this might break in the future
+  var currentSlideElement = document.querySelectorAll(".remark-slides-area .remark-slide")[slideIndex];
+  var currentSlideMermaids = currentSlideElement.querySelectorAll(".mermaid");
+  if (currentSlideMermaids.length !== 0) {
+    mermaid.init(undefined, currentSlideMermaids);
+  }
+}
+
+// don't let mermaid automatically load on start
+mermaid.initialize({
+  startOnLoad: false,
+  cloneCssStyles: false
+});
+
+  </script>
+  </head>
+<!--<body onload="slideshow = create()">-->
+  <body>
+    <script>
+      slideshow=create();
+
+      // first starting slide won't trigger the slide event, manually init mermaid
+      initMermaidInSlide(slideshow.getSlides()[slideshow.getCurrentSlideIndex()])
+      // on each slide event, trigger init mermaid
+      slideshow.on('afterShowSlide', initMermaidInSlide);
+    </script>
+    <script>
+            // Whether to auto activate terminals when entering a slide with "demo"
+            var activateTerminal = true;
+            // Function to activate "demo" iframes after 1.5 seconds
+            // Note than when a demo iframe is selected then navigation doesn't work anymore
+            (function() {
+              var isOverview = false;
+              var timeOut = null;
+/*
+              Reveal.addEventListener('slidechanged', function (event) {
+*/
+              var current = event.currentSlide;
+              if (!isOverview && activateTerminal) {
+                var iframe = current.querySelector("iframe.demo");
+                if (iframe) {
+                  timeOut = setTimeout(function () {
+                    // TODO: Maybe highlight frame when he gets focus
+                    iframe.contentWindow.focus();
+                    timeOut = null;
+                  }, 1500);
+                } else if (timeOut) {
+                  clearTimeout(timeOut);
+                  timeOut = null;
+                }
+                // event.previousSlide, event.currentSlide, event.indexh, event.indexv
+              }
+            });
+/*
+              Reveal.addEventListener('overviewshown', function() { isOverview = true; });
+              Reveal.addEventListener('overviewhidden', function() { isOverview = false; });
+*/
+            })();
+            function getButterflyUrl() {
+                var match = /^https?:\/\/([^:\/]+)/.exec(window.location);
+                return "http://" + match[1] + ":57575/";
+            }
+            // Setup slides with demos ....
+            function demo(event) {
+              var section = event.currentSlide || event;
+              var demo = section.getElementsByClassName('demo')[0];
+              if (demo) {
+                if (/PhantomJS/.test(window.navigator.userAgent)) {
+                   demo.style.display="none";
+                   return;
+                }
+                //var slide = document.querySelector("div.reveal div.slides");
+                //slide.style.width='1280px';
+                demo.src = getButterflyUrl();
+                var defaultHeight =
+                    section.offsetHeight
+                    + 200
+                    - demo.offsetTop
+                    + 'px';
+                var defaultWidth =
+                    section.offsetWidth
+                    - demo.offsetLeft
+                    + 100
+                    + Math.round(0.10 * section.offsetWidth)
+                    + 'px';
+                var defaultMarginLeft = "-110px";
+                var defaultPaddingTop = "10px";
+                // We try some default, but please overwrite them via localStorage if required
+                demo.style.height = (localStorage && localStorage.getItem("height")) || defaultHeight;
+                demo.style.width = (localStorage && localStorage.getItem("width")) || defaultWidth;
+                demo.style.marginLeft = (localStorage && localStorage.getItem("marginLeft")) || defaultMarginLeft;
+                demo.style.paddingTop = (localStorage && localStorage.getItem("paddingTop")) || defaultPaddingTop;
+                console.log('Slide ' + event.indexh + ': section.offsetHeight: ' + section.offsetHeight +
+                            ', demo.offsetTop: ' + (demo ? demo.offsetTop : 'no demo'));
+              }
+            }
+            /*
+            Reveal.addEventListener( 'slidechanged', demo );
+            Reveal.addEventListener( 'ready', demo );
+            var use8BitdoKeymap = (localStorage && localStorage.getItem("use8Bitdo"))
+            if (use8BitdoKeymap) {
+              Reveal.configure({
+                keyboard: {
+                  86: 'next',
+                  87: 'prev',
+                  82: 'up',
+                  65: 'down',
+                  81: 'left',
+                  80: 'right',
+                  //: 'navigateFragment',
+                  83: 'prevFragment',
+                  85: 'nextFragment',
+                  66: 'togglePause',
+                  //84: 'toggleAutoSlide',
+                  89: 'toggleOverview',
+                  84: function() {
+                    // Fullscreen
+                    Reveal.triggerKey(70)
+                  },
+                }
+              });
+            }
+            */
+        </script>
+  </body>
+</html>

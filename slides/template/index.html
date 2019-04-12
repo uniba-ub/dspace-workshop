@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>{{title}}</title>
+  {{{style}}}
+  <script src="remark.min.js"></script>
+  <script src="mermaid.min.js"></script>
+  <script>
+    function create() {
+      return remark.create({
+        {{{source}}},
+        ratio: '16:9',
+        highlightLines: true,
+        countIncrementalSlides: false,
+        highlightStyle: 'monokai'
+      });
+    }
+
+    function initMermaidInSlide(slide) {
+      var slideIndex = slide.getSlideIndex();
+      // caution: no API to get the DOM element of current slide in remark, this might break in the future
+      var currentSlideElement = document.querySelectorAll(".remark-slides-area .remark-slide")[slideIndex];
+      var currentSlideMermaids = currentSlideElement.querySelectorAll(".mermaid");
+      if (currentSlideMermaids.length !== 0) {
+        mermaid.init(undefined, currentSlideMermaids);
+      }
+    }
+
+    // don't let mermaid automatically load on start
+    //mermaid.initialize({
+      //startOnLoad: false,
+      //cloneCssStyles: false
+    //});
+  </script>
+  </head>
+<!--<body onload="slideshow = create()">-->
+  <body>
+    <script>
+      window.onload = function(){
+        slideshow=create();
+
+        // first starting slide won't trigger the slide event, manually init mermaid
+        //initMermaidInSlide(slideshow.getSlides()[slideshow.getCurrentSlideIndex()])
+        // on each slide event, trigger init mermaid
+        slideshow.on('afterShowSlide', initMermaidInSlide);
+
+        slideshow.on("showSlide", function(event){
+          var index = event.getSlideIndex();
+          var currentSlideElement = document.querySelectorAll(".remark-slides-area .remark-slide")[index];
+          var terminalsInSlide = currentSlideElement.querySelectorAll(".webterminal");
+
+          if(terminalsInSlide.length > 0){
+            terminalsInSlide[0].contentWindow.focus();
+          }
+          terminalsInSlide.forEach(function(terminal){
+            console.log(terminal);
+            var new_url = window.location.origin.split(":").slice(0, -1).join(":")+""+terminal.getAttribute("data-src");
+
+            terminal.setAttribute("src", new_url);
+            terminal.addEventListener("load", function(){
+              terminal.focus();
+            });
+          });
+        });
+      };
+    </script>
+  </body>
+</html>
