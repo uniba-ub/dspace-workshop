@@ -3,4 +3,4 @@ RUN apt-get update \
     && apt-get install -y \
 		cowsay
 
-CMD cowsay Hallo DSpace Anwendertreffen 2019 in Bamberg
+CMD /usr/games/cowsay Hallo DSpace Anwendertreffen 2019 in Bamberg
